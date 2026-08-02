@@ -1,0 +1,25 @@
+name: Publish Website
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  Publish-Website:
+    name: Publish-Website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Deploy ONLY the theme subfolder. Uploading the `lanton-church`
+      # directory makes its CONTENTS (style.css, functions.php, assets/, …)
+      # the root of the artifact, which WordPress.com extracts straight into
+      # the destination directory (/wp-content/themes/lanton-church). This
+      # keeps repo-only files (CLAUDE.md, brand_assests, README) off the live
+      # server and avoids nesting the theme one level too deep.
+      - name: Upload the artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wpcom
+          path: lanton-church
+          retention-days: 1
