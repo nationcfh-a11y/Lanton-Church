@@ -1,0 +1,21 @@
+/*
+Theme Name: Lanton Church of Christ
+Theme URI: https://example.com/lanton-church
+Author: Lanton Church of Christ
+Author URI: https://example.com
+Description: A simple, elegant, warm and welcoming block theme for Lanton Church of Christ — a New Testament congregation in Columbia, TN. Lightweight, page-builder-free, and portable to any WordPress host. Features a parallax single-page homepage and clean inner pages.
+Requires at least: 6.5
+Tested up to: 6.7
+Requires PHP: 7.4
+Version: 1.2.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: lanton-church
+Tags: full-site-editing, block-patterns, custom-colors, custom-menu, one-column, two-columns, wide-blocks, block-styles, church, religion
+*/
+
+/*
+ * Most styling lives in theme.json (design tokens) and assets/css/theme.css
+ * (parallax, scroll-reveal animations, and component polish).
+ * This file is required by WordPress for the theme header above.
+ */

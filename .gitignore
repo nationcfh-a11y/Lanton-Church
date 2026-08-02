@@ -1,0 +1,14 @@
+# OS / editor cruft
+.DS_Store
+
+# Local wp-now dev server artifacts
+wp-now.log
+.wp-now/
+node_modules/
+
+# Never commit real credentials
+wp-config.php
+*.log
+
+# Personal/sensitive document that ended up in brand_assests — do not publish
+brand_assests/PH-1663-Application-For-Certified-Copy-of-Certificate-of-Death.pdf
