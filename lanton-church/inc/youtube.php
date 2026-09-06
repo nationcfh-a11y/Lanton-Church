@@ -542,16 +542,19 @@ function lanton_yt_shortcode() {
 			}
 			$full = $count - $shorts;
 
+			// Each tab carries a full label and a short one. Phones show the
+			// short label so all three fit the screen at once — a scrolling
+			// row just reads as a cut-off button.
 			$tabs = array(
-				'all'   => array( 'All Videos', $count ),
-				'full'  => array( 'Full Messages', $full ),
-				'short' => array( 'Short Clips', $shorts ),
+				'all'   => array( 'All Videos', 'All', $count ),
+				'full'  => array( 'Full Messages', 'Full', $full ),
+				'short' => array( 'Short Clips', 'Shorts', $shorts ),
 			);
 			?>
 			<div class="lanton-videos__tabs" role="tablist" aria-label="Filter videos by length">
 				<?php foreach ( $tabs as $slug => $tab ) : ?>
 					<?php
-					list( $label, $n ) = $tab;
+					list( $label, $abbr, $n ) = $tab;
 					if ( 'all' !== $slug && ! $n ) {
 						continue; // Don't offer an empty filter.
 					}
@@ -559,8 +562,10 @@ function lanton_yt_shortcode() {
 					?>
 					<button type="button" role="tab" class="lanton-videos__tab<?php echo $is_active ? ' is-active' : ''; ?>"
 						data-kind="<?php echo esc_attr( $slug ); ?>"
-						aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>">
-						<?php echo esc_html( $label ); ?>
+						aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>"
+						aria-label="<?php echo esc_attr( sprintf( '%s (%s)', $label, number_format_i18n( $n ) ) ); ?>">
+						<span class="lanton-videos__tablabel"><?php echo esc_html( $label ); ?></span>
+						<span class="lanton-videos__tabshort"><?php echo esc_html( $abbr ); ?></span>
 						<span class="lanton-videos__tabcount"><?php echo esc_html( number_format_i18n( $n ) ); ?></span>
 					</button>
 				<?php endforeach; ?>
