@@ -4,6 +4,10 @@
  * Slug: lanton-church/videos
  * Categories: lanton
  * Inserter: true
+ *
+ * LEGACY. The YouTube gallery now lives on the Sermons page
+ * (patterns/sermons.php); /videos/ 301-redirects there. Kept only so installs
+ * seeded before that change still render if the redirect can't run.
  */
 ?>
 <!-- wp:paragraph {"align":"center","fontSize":"large","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|60"}}}} -->

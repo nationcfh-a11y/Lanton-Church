@@ -131,18 +131,32 @@
 			return;
 		}
 
-		var observer = new IntersectionObserver(
-			function (entries) {
-				entries.forEach(function (entry) {
-					if (entry.isIntersecting) {
-						entry.target.classList.add("is-in");
-						observer.unobserve(entry.target);
-					}
-				});
-			},
-			{ threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
-		);
-		targets.forEach(function (el) { observer.observe(el); });
+		function makeObserver(threshold) {
+			return new IntersectionObserver(
+				function (entries) {
+					entries.forEach(function (entry) {
+						if (entry.isIntersecting) {
+							entry.target.classList.add("is-in");
+							entry.target.__lantonObs.unobserve(entry.target);
+						}
+					});
+				},
+				{ threshold: threshold, rootMargin: "0px 0px -8% 0px" }
+			);
+		}
+
+		// An element taller than the viewport can never show 16% of itself, so
+		// the usual threshold would leave it stuck at opacity 0 forever (e.g.
+		// the full sermon gallery). Watch those for any intersection instead.
+		var observer = makeObserver(0.16);
+		var tallObserver = makeObserver(0);
+
+		targets.forEach(function (el) {
+			var tall = el.getBoundingClientRect().height > window.innerHeight * 0.9;
+			var obs = tall ? tallObserver : observer;
+			el.__lantonObs = obs;
+			obs.observe(el);
+		});
 	}
 
 	/* ----------------------------------------------------------------------

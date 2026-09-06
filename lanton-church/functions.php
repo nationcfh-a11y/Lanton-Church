@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'LANTON_VERSION', '1.6.1' );
+define( 'LANTON_VERSION', '1.12.0' );
 
 /**
  * Theme supports + nav menu location.

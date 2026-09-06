@@ -98,7 +98,6 @@ function lanton_default_pages() {
 		'about'         => array( 'About Us', 'lanton-church/about' ),
 		'service-times' => array( 'Service Times & Location', 'lanton-church/service-times' ),
 		'sermons'       => array( 'Sermons', 'lanton-church/sermons' ),
-		'videos'        => array( 'Videos', 'lanton-church/videos' ),
 		'events'        => array( 'Events', 'lanton-church/events' ),
 		'get-involved'  => array( 'Get Involved', 'lanton-church/get-involved' ),
 		'give'          => array( 'Give', 'lanton-church/give' ),
@@ -194,3 +193,23 @@ function lanton_seed_content() {
 	update_option( 'lanton_seeded', 1 );
 }
 add_action( 'wp_loaded', 'lanton_seed_content' );
+
+/**
+ * Send the retired /videos/ page to /sermons/.
+ *
+ * The YouTube gallery used to live on its own "Videos" page; it now *is* the
+ * Sermons page. Installs seeded before that change still have a /videos/ page,
+ * so point it (and any old link or bookmark) at the new home.
+ */
+function lanton_redirect_videos_page() {
+	if ( is_admin() || ! is_page( 'videos' ) ) {
+		return;
+	}
+
+	$sermons = get_page_by_path( 'sermons' );
+	if ( $sermons instanceof WP_Post ) {
+		wp_safe_redirect( get_permalink( $sermons ), 301 );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'lanton_redirect_videos_page' );

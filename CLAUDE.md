@@ -35,6 +35,29 @@ npx @wp-now/wp-now start --path "lanton-church" --port 8881
 - `functions.php` — enqueues Google Fonts + `assets/css/theme.css` +
   `assets/js/parallax.js`; registers the `lanton` pattern category; includes
   `inc/page-setup.php`, `inc/youtube.php`, `inc/contact-form.php`, `inc/smtp.php`.
+- `inc/youtube.php` — the `[lanton_youtube]` shortcode that **is** the Sermons
+  page: it pulls *every* upload from the church's channel (`@LantonChurchofChrist`)
+  via the free YouTube Data API v3 and renders a searchable, click-to-play card
+  grid (`patterns/sermons.php` just drops the shortcode into an `alignwide`
+  group). New uploads appear on their own — an **hourly WP-Cron job**
+  (`lanton_yt_refresh`) re-reads the channel, so nobody edits the site to add a
+  sermon. The list is cached in a 1-hour transient plus a durable
+  `lanton_yt_videos_backup` option, so a YouTube outage, quota trip, or dead key
+  never blanks the page. A **"Most Recent Sermon" spotlight** (`lanton-featured`)
+  sits above the archive showing the newest upload of any length, and the grid
+  below is filterable by **All / Full Messages / Short Clips** — Shorts are told
+  apart by runtime (`LANTON_YT_SHORT_MAX_SECONDS`, 3 min), which needs a second
+  `videos` API pass since playlistItems carries no duration. Only one video ever
+  plays at a time: starting another restores the previous card's thumbnail,
+  which destroys its iframe (a cross-origin embed can't be told to pause).
+  **Needs one thing: a free YouTube Data API key** —
+  wp-admin → **Settings → "Sermon Videos (YouTube)"** (status, key field,
+  "Refresh videos now"), or `LANTON_YT_API_KEY` in wp-config.php, or the
+  `*_FALLBACK` const. Until it's set the page shows a friendly setup notice and
+  admins get a dashboard nudge. The gallery used to live on its own `/videos/`
+  page; that page is retired and 301s to `/sermons/`
+  (`lanton_redirect_videos_page`), with `patterns/videos.php` kept only as a
+  legacy fallback.
 - `inc/contact-form.php` — the `[lanton_contact_form]` shortcode (used on the
   Contact page **and** the home page's bottom section) + its `admin-post`
   submission handler. Validates name/email/phone/subject/message, checks Google
@@ -68,6 +91,19 @@ npx @wp-now/wp-now start --path "lanton-church" --port 8881
   `.lh-note`s, a `.lh-times` info card (service times + Get Directions), `.lh-card`
   event cards, and the contact-form section (`id="contact-form"`).
 - `templates/page.html`, `index.html`, `404.html` — inner pages / fallbacks.
+  `page.html` is full-width: `main` is flow, the title band (`.lanton-page-hero`)
+  spans edge-to-edge with its text constrained to 980px, and `post-content` is
+  constrained at 780px with a 1240px wide size — so patterns can use
+  `"align":"wide"` to spread out (see `patterns/service-times.php`).
+- `templates/page-sermons.html` — the Sermons page only. Same as `page.html`
+  but the title band and body padding carry `is-compact` (roughly half the
+  vertical space) and the `post-title` drops to `x-large`, so the video archive
+  starts near the top instead of below a full-height hero.
+- `templates/page-about.html` — the About page only (WP picks it up from the
+  `about` slug). Drops `page.html`'s constrained wrapper and title band: `main`
+  and `post-content` both use flow layout so the About sections span edge to
+  edge like the homepage. The content still lives in `patterns/about.php`, so
+  it stays editable in the page editor.
 - `parts/header.html` — fixed header: the **stained-glass logo** (Site Logo
   block) at left + nav at right. The header stays frosted warm-white at all times
   (not transparent over the hero) so the colored logo and dark nav stay legible;
@@ -76,6 +112,16 @@ npx @wp-now/wp-now start --path "lanton-church" --port 8881
   `assets/images/lanton-logo.png` into the media library (self-healing, runs on
   any DB). A `site-title-fallback` text wordmark shows only if the logo is
   missing (`:has()` hides it when the logo renders). `parts/footer.html`.
+- `patterns/about.php` — the About page, written in the homepage's `lh-*` idiom:
+  a centered hero (`.lh-about-hero`, which also carries `.lh-hero` so the
+  `parallax.js` load fades — scoped to `.lh-hero .lanton-fade` — still fire), the
+  "Our Story" split with the teal-framed congregation photo + a `.lh-facts`
+  strip, a six-card `.lh-beliefs` grid (each card `.lh-note .lh-belief` with a
+  scripture ref pinned to the bottom), a sage `.lh-verse` band (classed
+  `lh-verse__quote` / `lh-verse__cite`, **not** `lh-verse__text`/`__ref` alone,
+  so the homepage verse carousel leaves it alone), four numbered `.lh-step`s for
+  a first visit, `.lh-leader` bio cards, and a closing `.lh-about-cta`. Cards sit
+  in `.lh-grid` (CSS grid; per-section column width via `--lh-grid-min`).
 - `patterns/*.php` — editable page content (about, service-times, sermons,
   events, get-involved, give, contact), category `lanton`, slug
   `lanton-church/<name>`. Pages are seeded with `<!-- wp:pattern {"slug":...} /-->`.
@@ -107,10 +153,12 @@ npx @wp-now/wp-now start --path "lanton-church" --port 8881
 ## Placeholders to fill (search content for `[`)
 
 Service times, phone, email, giving link, staff/elder/deacon names + bios,
-sermon embeds (YouTube/Audio blocks), social URLs. The logo is set (the
+social URLs. (Sermons are no longer hand-embedded — that page is fed live from
+YouTube; see `inc/youtube.php`.) The logo is set (the
 stained-glass `lanton-logo.png`); replace it by swapping that file or setting a
 new Custom Logo in the admin. **Contact form:** add Google reCAPTCHA v2 keys
-(see `inc/contact-form.php`) to turn on the "I'm not a robot" check; set SMTP
+(see `inc/contact-form.php`) to turn on the "I'm not a robot" check; **Sermons:**
+add a free YouTube Data API key under Settings → Sermon Videos (YouTube); set SMTP
 credentials (see `inc/smtp.php`) so form emails actually deliver, then verify
 via **Tools → Email (SMTP) Test**. The form emails `LANTON_CONTACT_TO`
 (currently dtkcenterprise@gmail.com for testing; production is

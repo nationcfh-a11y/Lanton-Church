@@ -104,6 +104,102 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 .site-nav__cta .wp-block-button__link { padding: 0.62rem 1.55rem; font-size: 0.72rem; }
 
 /* =========================================================================
+   MOBILE NAV OVERLAY
+   The header sets `backdrop-filter`, which makes it a containing block for
+   `position: fixed` descendants — that trapped WordPress's overlay menu
+   inside the ~72px header bar, so only the first link ("About") was visible
+   and the rest had to be scrolled to. Dropping the filter while the modal is
+   open lets the overlay fill the viewport again; the rules below then size
+   and space the links so every page fits on one screen.
+   ========================================================================= */
+html.has-modal-open .site-header {
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+	background: rgba(255, 253, 248, 0.96);
+}
+/* Same escape hatch for browsers/WP builds that don't set the html class. */
+.site-header:has(.wp-block-navigation__responsive-container.is-menu-open) {
+	backdrop-filter: none;
+	-webkit-backdrop-filter: none;
+}
+html.has-modal-open { overflow: hidden; }
+
+/* Toggles: a comfortable tap target for the hamburger and the close ✕. */
+.site-nav .wp-block-navigation__responsive-container-open {
+	color: var(--ink);
+	padding: 0.4rem;
+}
+.site-nav .wp-block-navigation__responsive-container-open svg,
+.site-nav .wp-block-navigation__responsive-container-close svg { width: 28px; height: 28px; }
+.site-nav .is-menu-open .wp-block-navigation__responsive-container-close {
+	position: fixed;
+	top: 0.9rem;
+	right: 1rem;
+	z-index: 3;
+	padding: 0.4rem;
+	color: #fff;
+}
+
+/* The overlay itself: a real full-screen sheet, links centred as one list. */
+.site-nav .wp-block-navigation__responsive-container.is-menu-open {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	padding: 4.75rem 1.25rem;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+/* `margin: auto` centres the list when it fits and still lets it scroll
+   from the top on very short screens instead of clipping. */
+.site-nav .is-menu-open .wp-block-navigation__responsive-close {
+	width: 100%;
+	max-width: none;
+	margin-block: auto;
+}
+/* Core reserves room above the list for its close button; ours is pinned to
+   the viewport corner, so that space would only push the links off-centre. */
+.site-nav .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-dialog {
+	width: 100%;
+	margin: 0;
+}
+.site-nav .wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation__responsive-container-content {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	gap: 0;
+}
+.site-nav .is-menu-open .wp-block-navigation__container {
+	display: flex !important;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	gap: clamp(0.2rem, 1.6vh, 0.85rem) !important;
+}
+.site-nav .is-menu-open .wp-block-navigation-item { width: 100%; }
+.site-nav .is-menu-open .wp-block-navigation-item__content {
+	display: block;
+	width: 100%;
+	text-align: center;
+	color: #fff;
+	font-size: clamp(1rem, 4.4vw, 1.35rem);
+	letter-spacing: 0.14em;
+	padding: clamp(0.5rem, 1.6vh, 0.9rem) 0.5rem;
+}
+.site-nav .is-menu-open .wp-block-navigation-item__content:hover,
+.site-nav .is-menu-open .wp-block-navigation-item__content:focus-visible { color: var(--gold); }
+.site-nav .is-menu-open .site-nav__cta {
+	justify-content: center;
+	margin-top: clamp(0.6rem, 2.4vh, 1.4rem);
+}
+.site-nav .is-menu-open .site-nav__cta .wp-block-button__link {
+	padding: 0.85rem 2.4rem;
+	font-size: 0.8rem;
+}
+
+/* =========================================================================
    ANIMATIONS — letter-by-letter hero, load fade, staggered scroll-reveal
    ========================================================================= */
 /* Hero headline, split into words/characters by JS. The word wrapper keeps
@@ -204,10 +300,80 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 	text-align: center;
 	border-bottom: 1px solid var(--mist);
 }
-.lanton-page-hero :where(h1) { color: var(--ink); }
+.lanton-page-hero :where(h1) {
+	color: var(--ink);
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+	margin: 0;
+}
+/* Sermons page: the archive itself is the point, so the title band and the
+   space beneath it are pulled in tight (templates/page-sermons.html). */
+.lanton-page-hero.is-compact {
+	padding-top: calc(var(--header-h) + clamp(1.4rem, 3.2vh, 2.4rem)) !important;
+	padding-bottom: clamp(1.4rem, 3.2vh, 2.4rem) !important;
+}
+.lanton-page-body.is-compact { padding-block: clamp(1.75rem, 3.5vw, 2.75rem); }
+
 .lanton-page-hero .lanton-eyebrow { color: var(--gold-dark); }
 .lh-hero .lanton-eyebrow { color: var(--sage); }
 .wp-site-blocks main > .wp-block-group:first-child:not(.lanton-page-hero) { padding-top: calc(var(--header-h) + 2rem); }
+
+/* Inner-page body: generous vertical rhythm, content free to go alignwide. */
+.lanton-page { overflow-x: clip; }
+.lanton-page-body { padding-block: clamp(3rem, 7vw, 5.5rem); }
+.lanton-page-body .wp-block-post-content > :first-child { margin-top: 0; }
+
+/* ---- SERVICE TIMES & LOCATION ("Find Us") ----------------------------- */
+.lanton-intro__lede { color: var(--muted); }
+.lanton-times-grid {
+	gap: clamp(1rem, 2vw, 1.6rem) !important;
+	align-items: stretch;
+}
+.lanton-times-grid > .wp-block-column { display: flex; }
+.lanton-time {
+	flex: 1;
+	background: var(--cream-soft);
+	border: 1px solid var(--mist);
+	border-radius: 16px;
+	padding: clamp(1.5rem, 2.4vw, 2.1rem) !important;
+	box-shadow: 0 10px 28px rgba(150, 95, 20, 0.08);
+	transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.35s ease;
+}
+.lanton-time:hover {
+	transform: translateY(-6px);
+	box-shadow: 0 22px 46px rgba(150, 95, 20, 0.18);
+	border-color: rgba(226, 167, 46, 0.55);
+}
+.lanton-time__day {
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	font-size: 0.72rem;
+	font-weight: 700;
+	color: var(--gold-dark);
+	margin: 0 0 0.55rem;
+}
+.lanton-time__name {
+	margin: 0 0 0.9rem;
+	position: relative;
+	padding-bottom: 0.9rem;
+	line-height: 1.2;
+}
+.lanton-time__name::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 30px;
+	height: 3px;
+	border-radius: 2px;
+	background: var(--teal);
+}
+.lanton-time__hour { margin: 0; color: var(--ink-soft); font-weight: 600; }
+
+.lanton-find { gap: clamp(2rem, 4.5vw, 4rem) !important; }
+.lanton-find__info .wp-block-heading { line-height: 1.25; margin: 0 0 1rem; }
+.lanton-find__info p { color: var(--muted); }
+.lanton-visit-cta p { color: var(--muted); }
 
 .lanton-bio, .lanton-ministry, .lanton-sermon, .lanton-event-row {
 	background: var(--cream-soft);
@@ -252,7 +418,34 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 }
 .lanton-about-intro .lanton-eyebrow { color: var(--gold-dark); }
 
-.lanton-map iframe { width: 100%; min-height: 420px; border: 0; border-radius: 6px; display: block; }
+.lanton-map { position: relative; margin: 0; }
+.lanton-map iframe {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	min-height: 380px;
+	border: 0;
+	border-radius: 18px;
+	display: block;
+	box-shadow: 0 18px 40px rgba(84, 90, 40, 0.14);
+}
+/* Find Us page: a taller map inside a teal stained-glass-style offset frame.
+   The frame sits outside the column, so it only shows where there's room. */
+.lanton-find .lanton-map iframe {
+	min-height: clamp(400px, 48vh, 560px);
+	box-shadow: 0 26px 56px rgba(84, 90, 40, 0.18);
+}
+@media (min-width: 1024px) {
+	.lanton-find .lanton-map::after {
+		content: "";
+		position: absolute;
+		inset: 16px -16px -16px 16px;
+		border: 2px solid var(--teal);
+		border-radius: 18px;
+		z-index: 0;
+		pointer-events: none;
+	}
+}
 
 /* Soft filled fields with a label above + an icon inside (see reference). */
 .lanton-contact-form input,
@@ -409,6 +602,58 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
    ========================================================================= */
 .lanton-videos { margin-top: 0.5rem; }
 
+/* ---- "Most Recent Sermon" spotlight ---- */
+.lanton-featured { margin-bottom: 2.75rem; }
+.lanton-featured__eyebrow {
+	margin: 0 0 0.85rem;
+	font-size: 0.76rem;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--gold-dark);
+	text-align: center;
+}
+.lanton-featured__card {
+	max-width: 900px;
+	margin-inline: auto;
+	border-width: 2px;
+	border-color: rgba(226, 167, 46, 0.45);
+	box-shadow: 0 22px 50px rgba(150, 95, 20, 0.2);
+}
+/* It's a spotlight, not a grid card — no hover lift. */
+.lanton-featured__card:hover {
+	transform: none;
+	box-shadow: 0 22px 50px rgba(150, 95, 20, 0.2);
+}
+.lanton-featured__card .lanton-video__play { width: 82px; height: 82px; }
+.lanton-featured__card .lanton-video__play::after { border-width: 14px 0 14px 23px; }
+.lanton-featured__card .lanton-video__time { font-size: 0.8rem; padding: 0.34rem 0.5rem; }
+.lanton-featured__body {
+	padding: 1.15rem 1.5rem 1.35rem;
+	text-align: center;
+}
+.lanton-featured__title {
+	margin: 0;
+	font-size: clamp(1.25rem, 1rem + 1vw, 1.7rem);
+	line-height: 1.25;
+	color: var(--ink);
+}
+.lanton-featured__date {
+	margin: 0.45rem 0 0;
+	font-size: 0.74rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--gold-dark);
+}
+@media (max-width: 560px) {
+	.lanton-featured { margin-bottom: 1.85rem; }
+	.lanton-featured__card { border-width: 1px; }
+	.lanton-featured__card .lanton-video__play { width: 62px; height: 62px; }
+	.lanton-featured__card .lanton-video__play::after { border-width: 11px 0 11px 18px; }
+	.lanton-featured__body { padding: 0.9rem 1rem 1.05rem; }
+}
+
 .lanton-videos__search {
 	display: flex;
 	flex-wrap: wrap;
@@ -447,8 +692,74 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 
 .lanton-videos__grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-	gap: 1.75rem;
+	/* Four across on desktop, stepping down with the viewport. minmax(0,1fr)
+	   (not auto-fill) so the columns share the row exactly rather than
+	   dropping to two when the cards' min-width doesn't quite fit. */
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1.75rem 1.4rem;
+}
+@media (max-width: 1180px) { .lanton-videos__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 860px)  { .lanton-videos__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px)  { .lanton-videos__grid { grid-template-columns: 1fr; } }
+
+/* ---- Length filter tabs (All / Full Messages / Short Clips) ---- */
+.lanton-videos__tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	order: 3;
+	flex: 1 1 100%;
+}
+@media (min-width: 900px) {
+	.lanton-videos__tabs { order: 0; flex: 0 1 auto; }
+}
+.lanton-videos__tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-family: inherit;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ink);
+	background: transparent;
+	border: 1px solid rgba(46, 42, 28, 0.16);
+	border-radius: 999px;
+	padding: 0.6rem 1.15rem;
+	cursor: pointer;
+	transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+.lanton-videos__tab:hover { border-color: var(--gold); background: rgba(234, 170, 56, 0.1); }
+.lanton-videos__tab:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
+.lanton-videos__tab.is-active {
+	background: var(--gold);
+	border-color: var(--gold);
+	color: #fff;
+	box-shadow: 0 8px 20px rgba(150, 95, 20, 0.22);
+}
+.lanton-videos__tabcount {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	opacity: 0.65;
+}
+.lanton-videos__tab.is-active .lanton-videos__tabcount { opacity: 0.85; }
+
+/* Runtime badge, bottom-right of the thumbnail (as on YouTube). */
+.lanton-video__time {
+	position: absolute;
+	right: 0.55rem;
+	bottom: 0.55rem;
+	background: rgba(19, 17, 11, 0.82);
+	color: #fff;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	line-height: 1;
+	padding: 0.28rem 0.42rem;
+	border-radius: 4px;
+	pointer-events: none;
 }
 
 .lanton-video {
@@ -541,6 +852,80 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 	overflow: hidden;
 }
 
+/* A card whose player is open shouldn't lift/scale on touch-hover. */
+.lanton-video.is-playing { transform: none; }
+.lanton-video.is-playing:hover { transform: none; box-shadow: 0 16px 36px rgba(150, 95, 20, 0.14); }
+
+/* =========================================================================
+   VIDEO GALLERY — MOBILE
+   Phones get: a full-width search field, the length filters as a single
+   swipeable row (so long labels never wrap into a ragged block), and tighter
+   cards so more than one fits on screen at a time.
+   ========================================================================= */
+@media (max-width: 860px) {
+	.lanton-videos__search {
+		gap: 0.85rem;
+		margin-bottom: 1.75rem;
+	}
+	.lanton-videos__input {
+		flex: 1 1 100%;
+		max-width: none;
+		font-size: 1rem;
+		padding: 0.9rem 1.25rem;
+	}
+
+	/* One swipeable row; edge padding is clipped back so the pills can run to
+	   the screen edge, which reads as "there's more this way". */
+	.lanton-videos__tabs {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		gap: 0.45rem;
+		padding-bottom: 0.15rem;
+		margin-inline: calc(var(--wp--preset--spacing--40, 1.25rem) * -1);
+		padding-inline: var(--wp--preset--spacing--40, 1.25rem);
+	}
+	.lanton-videos__tabs::-webkit-scrollbar { display: none; }
+	.lanton-videos__tab {
+		flex: 0 0 auto;
+		font-size: 0.72rem;
+		letter-spacing: 0.07em;
+		padding: 0.62rem 0.95rem;
+		gap: 0.4rem;
+	}
+	.lanton-videos__count {
+		order: 4;
+		flex: 1 1 100%;
+		font-size: 0.76rem;
+	}
+}
+
+@media (max-width: 560px) {
+	.lanton-videos__grid { gap: 1.15rem; }
+
+	/* Flatter cards: the lift/shadow is a pointer affordance that just eats
+	   vertical space on a phone. */
+	.lanton-video {
+		border-radius: 12px;
+		box-shadow: 0 8px 20px rgba(150, 95, 20, 0.12);
+	}
+	.lanton-video:hover { transform: none; box-shadow: 0 8px 20px rgba(150, 95, 20, 0.12); }
+	.lanton-video:hover .lanton-video__thumb img { transform: none; }
+
+	.lanton-video__body { padding: 0.85rem 1rem 1rem; }
+	.lanton-video__date { font-size: 0.68rem; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+	.lanton-video__title { font-size: 1.02rem; line-height: 1.3; }
+
+	/* Smaller play target so it doesn't swallow the thumbnail, but still well
+	   over the 44px minimum touch size. */
+	.lanton-video__play { width: 52px; height: 52px; }
+	.lanton-video__play::after { border-width: 9px 0 9px 15px; }
+	.lanton-video__time { font-size: 0.68rem; right: 0.45rem; bottom: 0.45rem; }
+
+	.lanton-videos__empty { font-size: 0.95rem; }
+}
+
 .lanton-videos__empty {
 	margin-top: 2rem;
 	text-align: center;
@@ -569,6 +954,14 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 	.site-header__inner { flex-wrap: wrap; }
 	.lanton-about-intro { flex-direction: column; }
 	.lanton-about-intro .wp-block-column { flex-basis: 100% !important; }
+	.lanton-find { flex-direction: column; }
+	.lanton-find .wp-block-column { flex-basis: 100% !important; }
+}
+
+/* Time cards: 4 across on desktop, 2 across on tablet, stacked on phones. */
+@media (min-width: 600px) and (max-width: 1023px) {
+	.lanton-times-grid { flex-wrap: wrap !important; }
+	.lanton-times-grid > .wp-block-column { flex-basis: calc(50% - 0.8rem) !important; }
 }
 
 /* =========================================================================
@@ -680,7 +1073,8 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 	text-align: center;
 }
 .lh-verse__eyebrow { color: rgba(255, 255, 255, 0.82) !important; }
-.lh-verse__text {
+.lh-verse__text,
+.lh-verse__quote {
 	font-family: var(--wp--preset--font-family--heading);
 	font-style: italic; font-weight: 500; color: #fff;
 	line-height: 1.28; letter-spacing: -0.01em;
@@ -767,4 +1161,134 @@ body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; 
 	.lh-times__loc { border-left: 0; border-top: 1px solid var(--mist); padding-top: 1.5rem; padding-left: 0; }
 	.lh-events__head { align-items: flex-start; }
 	.lh-events__all { margin-top: 1.25rem; }
+}
+
+/* =========================================================================
+   ABOUT PAGE (lh-about-*) — homepage idiom (lh-*) applied to a long-form
+   inner page. Rendered edge-to-edge via templates/page-about.html.
+   ========================================================================= */
+.lanton-about-page { overflow-x: clip; }
+
+/* ---- Hero: centered type, no photo (reuses .lh-hero for the load fades) -- */
+.lh-about-hero { text-align: center; }
+.lh-about-hero .lanton-eyebrow { color: var(--sage); }
+.lh-about-hero .lh-hero__title { margin: 0.5rem 0 1.25rem; }
+.lh-about-hero .lh-lede { max-width: 680px; margin-inline: auto; }
+.lh-about-hero .lh-hero__meta { margin-top: 2rem; }
+
+/* ---- Our story: framed photo + narrative + a small fact strip ---------- */
+.lh-story { background: var(--cream-soft); }
+.lh-split { gap: clamp(2rem, 5vw, 4.5rem) !important; align-items: center; }
+.lh-story .lanton-eyebrow { color: var(--gold-dark); }
+.lh-story h2 { margin: 0.35rem 0 1.1rem; }
+.lh-story p { color: var(--ink-soft); }
+.lh-facts {
+	list-style: none; margin: clamp(2.5rem, 5vw, 3.75rem) 0 0; padding: 1.75rem 0 0;
+	border-top: 1px solid var(--mist);
+	display: grid; grid-template-columns: repeat(4, 1fr);
+	gap: 1.5rem 2.25rem;
+}
+.lh-facts li { margin: 0; line-height: 1.35; }
+.lh-facts strong {
+	display: block; font-family: var(--wp--preset--font-family--heading);
+	font-weight: 500; font-size: 1.2rem; color: var(--ink);
+}
+.lh-facts span {
+	display: block; margin-top: 0.2rem; color: var(--muted);
+	font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+}
+
+/* ---- Shared responsive card grid (beliefs, steps, leaders) ------------- */
+.lh-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(var(--lh-grid-min, 280px), 1fr));
+	gap: clamp(1.25rem, 2.5vw, 1.75rem);
+	margin-top: clamp(2.25rem, 4vw, 3.25rem);
+	align-items: stretch;
+}
+.lh-grid > * { margin: 0 !important; }
+
+/* ---- What we believe --------------------------------------------------- */
+.lh-beliefs { background: linear-gradient(180deg, var(--cream-soft) 0%, var(--cream) 100%); }
+.lh-beliefs .lanton-eyebrow { color: var(--sage); }
+.lh-beliefs__head h2 { letter-spacing: -0.01em; margin: 0.35rem 0 0.6rem; }
+.lh-belief { display: flex; flex-direction: column; }
+.lh-belief p { color: var(--muted); margin: 0; }
+.lh-belief .lh-belief__ref { margin-top: auto !important; padding-top: 1.4rem; }
+.lh-belief__ref {
+	padding-top: 0.9rem;
+	border-top: 1px solid var(--mist);
+	font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em;
+	text-transform: uppercase; color: var(--gold-dark) !important;
+}
+.lh-beliefs__foot {
+	margin-top: clamp(2rem, 4vw, 2.75rem); color: var(--muted); font-size: 0.98rem;
+}
+.lh-beliefs__foot a { color: var(--sage-dark); text-decoration: none; border-bottom: 1px solid rgba(126, 158, 99, 0.45); }
+.lh-beliefs__foot a:hover { border-color: var(--sage); color: var(--ink); }
+
+/* ---- What to expect: numbered steps ----------------------------------- */
+.lh-visit { background: var(--cream-soft); }
+.lh-visit .lanton-eyebrow { color: var(--sage); }
+.lh-visit__head h2 { letter-spacing: -0.01em; margin: 0.35rem 0 0.6rem; }
+.lh-steps { --lh-grid-min: 215px; }
+.lh-step {
+	position: relative; text-align: left;
+	padding: clamp(1.6rem, 2.5vw, 2.15rem) 0 0 !important;
+	border-top: 3px solid var(--mist);
+	transition: border-color 0.35s ease;
+}
+.lh-step:hover { border-top-color: var(--gold); }
+.lh-step__num {
+	font-family: var(--wp--preset--font-family--heading);
+	font-size: 1.05rem; font-weight: 600; letter-spacing: 0.06em;
+	color: var(--gold-dark); margin: 0 0 0.6rem;
+}
+.lh-step :where(h3) { margin: 0 0 0.5rem; color: var(--ink); }
+.lh-step p { color: var(--muted); margin: 0; font-size: 0.98rem; }
+.lh-visit__notes {
+	list-style: none; margin: clamp(2.25rem, 4vw, 3rem) 0 0; padding: 0;
+	display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 1.25rem 2.25rem;
+}
+.lh-visit__notes li {
+	margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.6;
+	padding-left: 1.4rem; position: relative;
+}
+.lh-visit__notes li::before {
+	content: ""; position: absolute; left: 0; top: 0.62em;
+	width: 8px; height: 8px; border-radius: 50%; background: var(--teal);
+}
+.lh-visit__notes strong { color: var(--ink); font-weight: 600; }
+
+/* ---- Leadership -------------------------------------------------------- */
+.lh-leaders { background: linear-gradient(180deg, var(--cream-soft) 0%, var(--cream) 100%); }
+.lh-leaders .lanton-eyebrow { color: var(--sage); }
+.lh-leaders__head h2 { letter-spacing: -0.01em; margin: 0.35rem 0 0.6rem; }
+.lh-leaders__grid { --lh-grid-min: 235px; }
+.lh-leader .lanton-bio__role { margin: 0 0 0.35rem; }
+.lh-leader :where(h3) { padding-top: 0; margin: 0 0 0.5rem; }
+.lh-leader :where(h3)::before { display: none; }
+.lh-leader p:last-child { color: var(--muted); margin: 0; }
+
+/* ---- Closing call to action ------------------------------------------- */
+.lh-about-cta { background: var(--cream); text-align: center; }
+.lh-about-cta .lanton-eyebrow { color: var(--gold-dark); }
+.lh-about-cta h2 { letter-spacing: -0.01em; margin: 0.35rem 0 0.6rem; }
+.lh-about-cta .wp-block-buttons { justify-content: center; }
+
+/* ---- About responsive -------------------------------------------------- */
+/* Tablets: even 2-up grids rather than a 3-up row with an orphan. */
+@media (max-width: 1023px) {
+	.lh-facts { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 600px) and (max-width: 1023px) {
+	.lh-beliefs__grid, .lh-steps, .lh-leaders__grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 781px) {
+	.lh-split { flex-direction: column; }
+	.lh-split .wp-block-column { flex-basis: 100% !important; }
+	.lanton-about-photo::before { inset: 12px -12px -12px 12px; }
+	.lh-facts { gap: 1.1rem 1.75rem; }
+	.lh-facts strong { font-size: 1.1rem; }
 }
