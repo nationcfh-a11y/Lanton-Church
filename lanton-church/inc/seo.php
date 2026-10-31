@@ -201,6 +201,11 @@ function lanton_seo_sitemap_exclude_post_type( $exclude, $type ) {
 }
 add_filter( 'rank_math/sitemap/exclude_post_type', 'lanton_seo_sitemap_exclude_post_type', 99, 2 );
 
+// Rank Math caches built sitemaps and only rebuilds on content edits, so the
+// exclusions above would otherwise never show up. The site is small enough to
+// build the sitemap fresh on every request.
+add_filter( 'rank_math/sitemap/enable_caching', '__return_false' );
+
 function lanton_seo_robots( $robots ) {
 	if ( is_singular() || is_category() ) {
 		if ( lanton_seo_is_stock_content( get_queried_object() ) ) {
