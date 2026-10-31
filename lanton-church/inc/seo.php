@@ -203,10 +203,36 @@ function lanton_seo_sitemap_entry( $url, $type, $object ) {
 }
 add_filter( 'rank_math/sitemap/entry', 'lanton_seo_sitemap_entry', 99, 3 );
 
+/**
+ * Does the site have any published blog post besides "Hello world!"? Until it
+ * does, the post and category sitemaps would be empty (404) yet still listed
+ * in the sitemap index, so they're left out entirely.
+ */
+function lanton_seo_has_real_posts() {
+	static $has = null;
+	if ( null === $has ) {
+		$has = false;
+		foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 2 ) ) as $post ) {
+			if ( ! lanton_seo_is_stock_content( $post ) ) {
+				$has = true;
+			}
+		}
+	}
+	return $has;
+}
+
 function lanton_seo_sitemap_exclude_post_type( $exclude, $type ) {
-	return 'mailpoet_page' === $type ? true : $exclude;
+	if ( 'mailpoet_page' === $type || ( 'post' === $type && ! lanton_seo_has_real_posts() ) ) {
+		return true;
+	}
+	return $exclude;
 }
 add_filter( 'rank_math/sitemap/exclude_post_type', 'lanton_seo_sitemap_exclude_post_type', 99, 2 );
+
+function lanton_seo_sitemap_exclude_taxonomy( $exclude, $taxonomy ) {
+	return ( 'category' === $taxonomy && ! lanton_seo_has_real_posts() ) ? true : $exclude;
+}
+add_filter( 'rank_math/sitemap/exclude_taxonomy', 'lanton_seo_sitemap_exclude_taxonomy', 99, 2 );
 
 // Rank Math caches built sitemaps and only rebuilds on content edits, so the
 // exclusions above would otherwise never show up. The site is small enough to
