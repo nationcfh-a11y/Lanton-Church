@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'LANTON_VERSION', '1.12.0' );
+define( 'LANTON_VERSION', '1.13.0' );
 
 /**
  * Theme supports + nav menu location.
@@ -140,3 +140,10 @@ require_once get_template_directory() . '/inc/contact-form.php';
  * Mail SMTP plugin if that's ever installed.
  */
 require_once get_template_directory() . '/inc/smtp.php';
+
+/**
+ * Search-engine signals: corrects Rank Math's titles, meta descriptions,
+ * schema and sitemap through its own filters so Google shows "Lanton Church
+ * of Christ" as the site name. Prints no tags itself. See inc/seo.php.
+ */
+require_once get_template_directory() . '/inc/seo.php';

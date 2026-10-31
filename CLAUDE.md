@@ -78,6 +78,16 @@ npx @wp-now/wp-now start --path "lanton-church" --port 8881
   page (send a test, see the failure reason) and a dashboard nudge until it's set
   up. Until SMTP is configured, `wp_mail()` won't deliver under wp-now/Playground
   (no local mail server).
+- `inc/seo.php` — **Rank Math is the only SEO source**; this file prints no
+  tags, it only corrects Rank Math via its filters (`rank_math/frontend/title`,
+  `/description`, `rank_math/json_ld`, `rank_math/sitemap/entry`, …): home title
+  "Lanton Church of Christ | Church in Columbia, TN", fallback meta description
+  per page slug (a description set in Rank Math wins), schema publisher is an
+  `Organization` (`#organization`, not Rank Math's `#person`), WebSite `url` =
+  canonical home URL **with trailing slash**, no Article/author on pages, and
+  the sitemap drops `/videos/`, Hello world, Uncategorized and MailPoet pages.
+  Goal: Google shows the brand, not the domain, as the site name. Never add a
+  second SEO plugin or Jetpack SEO alongside Rank Math.
 - `inc/page-setup.php` — **first-run seeder** (guarded by the `lanton_seeded`
   option): creates the 8 pages, sets the static front page, pretty permalinks,
   site title, and registers the `ghost` / `ghost-light` button styles. Delete
