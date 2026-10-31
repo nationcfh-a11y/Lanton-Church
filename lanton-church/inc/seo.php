@@ -179,13 +179,20 @@ add_filter( 'rank_math/json_ld', 'lanton_seo_json_ld', 99 );
  * Sitemap + indexing of leftover default content
  * ------------------------------------------------------------------------- */
 
-/** Is this the default "Hello world!" post or "Uncategorized" archive? */
+/**
+ * Is this the default "Hello world!" post, the retired /videos/ page, or the
+ * "Uncategorized" archive? Rank Math's sitemap hands over raw database rows
+ * (stdClass), not WP_Post/WP_Term, so check fields rather than classes.
+ */
 function lanton_seo_is_stock_content( $object ) {
-	if ( $object instanceof WP_Post ) {
+	if ( ! is_object( $object ) ) {
+		return false;
+	}
+	if ( isset( $object->post_type, $object->post_name ) ) {
 		return ( 'post' === $object->post_type && 'hello-world' === $object->post_name )
 			|| ( 'page' === $object->post_type && 'videos' === $object->post_name );
 	}
-	if ( $object instanceof WP_Term ) {
+	if ( isset( $object->taxonomy, $object->slug ) ) {
 		return 'category' === $object->taxonomy && 'uncategorized' === $object->slug;
 	}
 	return false;
